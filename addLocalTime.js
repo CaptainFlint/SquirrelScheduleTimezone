@@ -6,6 +6,9 @@
 // @author       CaptainFlint
 // @match        https://squirrel.tv/schedule/
 // @icon         https://www.google.com/s2/favicons?domain=squirrel.tv
+// @updateURL    https://raw.githubusercontent.com/CaptainFlint/SquirrelScheduleTimezone/master/addLocalTime.js
+// @downloadURL  https://raw.githubusercontent.com/CaptainFlint/SquirrelScheduleTimezone/master/addLocalTime.js
+// @supportURL   https://github.com/CaptainFlint/SquirrelScheduleTimezone/issues
 // @grant        none
 // ==/UserScript==
 
