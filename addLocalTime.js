@@ -71,10 +71,12 @@
 		// 1pm-11pm => 13-23
 		// 12am => 0/24
 		if ((hours >= 1) && (hours <= 11)) {
-			if (isPM)
+			if (isPM) {
 				hours24 = hours + 12;
-			else
+			}
+			else {
 				hours24 = hours;
+			}
 		}
 		else if ((hours == 12) || (hours == 0)) {
 			hours24 = (isPM ? 12 : 0);
@@ -90,7 +92,7 @@
 		// 12 => 12pm
 		// 13-23 => 1pm-11pm
 		// 0/24 => 12am
-		 if ((hours == 0) || (hours == 24)) {
+		if ((hours == 0) || (hours == 24)) {
 			hours12 = 12;
 			timeOfDay = 'am';
 		}
@@ -115,10 +117,14 @@
 	function isDSTinUK(date) {
 		var d = new Date(date);
 		var m = d.getMonth();
-		if ((m < 2) || (m > 9)) // Nov till Feb: no DST
+		if ((m < 2) || (m > 9)) {
+			// Nov till Feb: no DST
 			return false;
-		if ((m > 2) && (m < 9)) // Apr till Sep: DST
+		}
+		if ((m > 2) && (m < 9)) {
+			// Apr till Sep: DST
 			return true;
+		}
 		// Mar or Oct: calculate the last Sunday
 		var lastSun = new Date(date.substr(0, 8) + '31');
 		// Sunday is 0, so subtracting the day's number will bring us to the nearest Sunday
@@ -131,14 +137,16 @@
 	function UKtimeToLocal(date, time) {
 		var m = time.match(/^(\d+)(?::(\d+))?(am|pm)$/i);
 		var errorRes = '<span style="color: red;">???</span>';
-		if (!m)
+		if (!m) {
 			return errorRes;
+		}
 		var hours = parseInt(m[1]);
 		var minutes = (m[2] ? parseInt(m[2]) : 0);
 		var td = m[3].toLowerCase();
 		hours = from12to24(hours, td);
-		if (!hours)
+		if (!hours) {
 			return errorRes;
+		}
 		var refDatetimeStr = date + 'T' + num2str(hours) + ':' + num2str(minutes) + ':00' + (isDSTinUK(date) ? '+0100' : '+0000');
 		var localDatetime = new Date(refDatetimeStr);
 		var resH = localDatetime.getHours();
@@ -174,8 +182,9 @@
 	// Process the rest of the cells: times at specific week days
 	for (var i = 1; i < tableCells.length; ++i) {
 		var cell = $(tableCells[i]);
-		if (!cell.text().trim())
+		if (!cell.text().trim()) {
 			continue;
+		}
 		cell.html(cell.html().replace(/(\d+)(?::(\d+))?(am|pm)/gi, function(match) { return UKtimeToLocal(shiftDate(startDate, i - 1), match); }));
 	}
 
