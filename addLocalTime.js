@@ -13,7 +13,11 @@
 // ==/UserScript==
 
 (function() {
-    'use strict';
+	'use strict';
+
+	// User-configurable section
+	const USE_24_HOURS_FORMAT = true;
+	// End of user-configurable section
 
 	var $ = jQuery;
 
@@ -34,21 +38,21 @@
 
 	// Two-digit formatting
 	function num2str(num) {
-		return ((num == 0) ? '00' : (((num < 10) ? '0' : '') + num));
+		return (((num < 10) ? '0' : '') + num);
 	}
 
-	// Convert from '29th March 2021' into '2021-03-29' 
+	// Convert from '29th March 2021' into '2021-03-29'
 	function dateToRfc(dateStr) {
 		var dateParts = dateStr.split(' ');
-		var dateStr = dateParts[2] + '-';
+		var dateStrRes = dateParts[2] + '-';
 		for (var i = 0; i < monthNames.length; ++i) {
 			if (dateParts[1].startsWith(monthNames[i])) {
-				dateStr += num2str(i + 1) + '-';
+				dateStrRes += num2str(i + 1) + '-';
 				break;
 			}
 		}
-		dateStr += num2str(dateParts[0].replace(/^(\d+)\D*$/, '$1'));
-		return dateStr;
+		dateStrRes += num2str(dateParts[0].replace(/^(\d+)\D*$/, '$1'));
+		return dateStrRes;
 	}
 
 	// Change the specified date by the specified amount of days
@@ -56,6 +60,53 @@
 		// Shifting is using the amount of milliseconds
 		var d = new Date(new Date(date).valueOf() + inc * 86400000);
 		return d.getFullYear() + '-' + num2str(d.getMonth()) + '-' + num2str(d.getDate());
+	}
+
+	// Convert hours from 12-hour format to 24-hour
+	function from12to24(hours, timeOfDay) {
+		var hours24;
+		var isPM = (timeOfDay.toLowerCase() == 'pm');
+		// 1am-11am => 1-11
+		// 12pm => 12
+		// 1pm-11pm => 13-23
+		// 12am => 0/24
+		if ((hours >= 1) && (hours <= 11)) {
+			if (isPM)
+				hours24 = hours + 12;
+			else
+				hours24 = hours;
+		}
+		else if ((hours == 12) || (hours == 0)) {
+			hours24 = (isPM ? 12 : 0);
+		}
+		return hours24;
+	}
+
+	// Convert hours from 24-hour format to 12-hour
+	function from24to12(hours) {
+		var hours12;
+		var timeOfDay;
+		// 1-11 => 1am-11am
+		// 12 => 12pm
+		// 13-23 => 1pm-11pm
+		// 0/24 => 12am
+		 if ((hours == 0) || (hours == 24)) {
+			hours12 = 12;
+			timeOfDay = 'am';
+		}
+		else if ((hours >= 1) && (hours <= 11)) {
+			hours12 = hours;
+			timeOfDay = 'am';
+		}
+		else if ((hours == 12)) {
+			hours12 = 12;
+			timeOfDay = 'pm';
+		}
+		else if ((hours >= 13) && (hours <= 23)) {
+			hours12 = hours - 12;
+			timeOfDay = 'pm';
+		}
+		return [hours12, timeOfDay];
 	}
 
 	// Calculates whether DST is in effect in UK at the specific date.
@@ -85,22 +136,20 @@
 		var hours = parseInt(m[1]);
 		var minutes = (m[2] ? parseInt(m[2]) : 0);
 		var td = m[3].toLowerCase();
-		// 1am-11am => 1-11
-		// 12pm => 12
-		// 1pm-11pm => 13-23
-		// 12am => 0/24
-		if ((hours >= 1) && (hours <= 11)) {
-			if (td == 'pm')
-				hours += 12;
-		}
-		else if ((hours == 12) || (hours == 0)) {
-			hours = ((td == 'pm') ? 12 : 0);
-		}
-		else
+		hours = from12to24(hours, td);
+		if (!hours)
 			return errorRes;
 		var refDatetimeStr = date + 'T' + num2str(hours) + ':' + num2str(minutes) + ':00' + (isDSTinUK(date) ? '+0100' : '+0000');
 		var localDatetime = new Date(refDatetimeStr);
-		return num2str(localDatetime.getHours()) + ':' + num2str(localDatetime.getMinutes());
+		var resH = localDatetime.getHours();
+		var resM = localDatetime.getMinutes();
+		if (USE_24_HOURS_FORMAT) {
+			return num2str(resH) + ':' + num2str(resM);
+		}
+		else {
+			var [resH12, resTD] = from24to12(resH);
+			return resH12 + (resM ? (':' + num2str(resM)) : '') + resTD;
+		}
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
