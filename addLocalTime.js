@@ -59,7 +59,7 @@
 	function shiftDate(date, inc) {
 		// Shifting is using the amount of milliseconds
 		var d = new Date(new Date(date).valueOf() + inc * 86400000);
-		return d.getFullYear() + '-' + num2str(d.getMonth()) + '-' + num2str(d.getDate());
+		return d.getFullYear() + '-' + num2str(d.getMonth() + 1) + '-' + num2str(d.getDate());
 	}
 
 	// Convert hours from 12-hour format to 24-hour
