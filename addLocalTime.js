@@ -143,10 +143,10 @@
 		var hours = parseInt(m[1]);
 		var minutes = (m[2] ? parseInt(m[2]) : 0);
 		var td = m[3].toLowerCase();
-		hours = from12to24(hours, td);
-		if (!hours) {
+		if (isNaN(hours) || isNaN(minutes)) {
 			return errorRes;
 		}
+		hours = from12to24(hours, td);
 		var refDatetimeStr = date + 'T' + num2str(hours) + ':' + num2str(minutes) + ':00' + (isDSTinUK(date) ? '+0100' : '+0000');
 		var localDatetime = new Date(refDatetimeStr);
 		var resH = localDatetime.getHours();
